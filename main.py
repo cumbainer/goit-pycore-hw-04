@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 import random
 import re
+from random import sample
 from typing import Dict, List
 
 
@@ -34,11 +35,11 @@ def get_numbers_ticket(min_input:int, max_input:int, quantity_input:int) -> list
 
     input_range = list(range(min_input, max_input + 1))
     random_choices = random.choices(input_range, k=quantity_input)
-    return sorted(set(random_choices))
+    return sorted(random.sample(random_choices, quantity_input))
 
 task2_min_input = 4
 task2_max_input = 100
-task2_quantity_input = 4
+task2_quantity_input = 8
 task2_result = get_numbers_ticket(task2_min_input, task2_max_input, task2_quantity_input)
 print(f"Number of tickets between {task2_min_input} and {task2_max_input} is: {task2_result}")
 #END TASK 2
@@ -97,12 +98,11 @@ def get_upcoming_birthdays(users:List[Dict[str, str]]) -> List[Dict[str, str]]:
         elif is_sunday:
             greeting_date = greeting_date + timedelta(days=1)
 
-        birthday_happened = (today.month > user_birthday.month) and (today.day > user_birthday.day)
+        birthday_happened = greeting_date < today.date()
         if birthday_happened:
             greeting_date = greeting_date.replace(year=today_year + 1)
 
         return greeting_date
-
 
     today_year = datetime.today().year
     out: List[Dict[str, str]] = []
@@ -117,18 +117,9 @@ def get_upcoming_birthdays(users:List[Dict[str, str]]) -> List[Dict[str, str]]:
     return out
 
 users_input = [
-    {"name": "", "birthday": "2006.02.07"},
+    {"name": "", "birthday": "2006.02.01"},
     {"name": "Jane Smith", "birthday": "2007.02.10"}
 ]
 task4_result = get_upcoming_birthdays(users_input)
 print("Cписок привітань на цьому тижні:", task4_result)
-
-# RESPONSE:
-# [
-#     {'name': 'John Doe', 'congratulation_date': '2024.01.23'},
-#     {'name': 'Jane Smith', 'congratulation_date': '2024.01.29'}
-# ]
-
-
-
 #END TASK 4
