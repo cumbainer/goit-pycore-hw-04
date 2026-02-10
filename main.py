@@ -34,8 +34,8 @@ def get_numbers_ticket(min_input:int, max_input:int, quantity_input:int) -> list
     validate_input(min_input, max_input, quantity_input)
 
     input_range = list(range(min_input, max_input + 1))
-    random_choices = random.choices(input_range, k=quantity_input)
-    return sorted(random.sample(random_choices, quantity_input))
+    numbers = random.sample(input_range, k=quantity_input)
+    return sorted(numbers)
 
 task2_min_input = 4
 task2_max_input = 100
@@ -86,38 +86,45 @@ print("Нормалізовані номери телефонів для SMS-р�
 
 #TASK 4
 TASK4_BIRTHDAY_PATTERN = "%Y.%m.%d"
-def get_upcoming_birthdays(users:List[Dict[str, str]]) -> List[Dict[str, str]]:
-    def get_greeting_date(user_birthday:date) -> date:
-        today = datetime.today()
-        greeting_date = user_birthday.replace(year=today.year)
+TASK4_DAYS_AHEAD = 7
 
-        is_saturday = greeting_date.weekday() == 5
-        is_sunday = greeting_date.weekday() == 6
-        if is_saturday:
-            greeting_date = greeting_date + timedelta(days=2)
-        elif is_sunday:
-            greeting_date = greeting_date + timedelta(days=1)
+def _safe_replace_year(d: date, year: int) -> date:
+    try:
+        return d.replace(year=year)
+    except ValueError:
+        return date(year, 2, 28)
 
-        birthday_happened = greeting_date < today.date()
-        if birthday_happened:
-            greeting_date = greeting_date.replace(year=today_year + 1)
+def get_upcoming_birthdays(users: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    today = date.today()
+    end_date = today + timedelta(days=TASK4_DAYS_AHEAD)
 
-        return greeting_date
-
-    today_year = datetime.today().year
     out: List[Dict[str, str]] = []
+
     for user in users:
-        user_birthday_date = datetime.strptime(user.get("birthday"), TASK4_BIRTHDAY_PATTERN).date()
-        greeting_date_result = get_greeting_date(user_birthday_date)
+        bday = datetime.strptime(user["birthday"], TASK4_BIRTHDAY_PATTERN).date()
+
+        next_bday = _safe_replace_year(bday, today.year)
+        if next_bday < today:
+            next_bday = _safe_replace_year(bday, today.year + 1)
+
+        if not (today <= next_bday <= end_date):
+            continue
+
+        congrat = next_bday
+        if congrat.weekday() == 5:
+            congrat += timedelta(days=2)
+        elif congrat.weekday() == 6:
+            congrat += timedelta(days=1)
 
         out.append({
-            "name": user.get("name"),
-            "congratulation_date": greeting_date_result.strftime(TASK4_BIRTHDAY_PATTERN)
+            "name": user.get("name", ""),
+            "congratulation_date": congrat.strftime(TASK4_BIRTHDAY_PATTERN),
         })
+
     return out
 
 users_input = [
-    {"name": "", "birthday": "2006.02.01"},
+    {"name": "Dendi Pudge", "birthday": "2002.02.13"},
     {"name": "Jane Smith", "birthday": "2007.02.10"}
 ]
 task4_result = get_upcoming_birthdays(users_input)
