@@ -1,26 +1,18 @@
-from typing import List, Dict
+import re
+from typing import Callable, List
 
-file_path_task2 = "./cats.csv"
+FLOAT_PATTERN = r'(?<!\d)\d+\.\d+(?!\d)'
+def generator_numbers(text: str):
+    for m in re.finditer(FLOAT_PATTERN, text):
+        yield float(m.group())
+
+def sum_profit(text: str, generator: Callable):
+    total_income = 0
+    for number in generator(text):
+        total_income += number
+    return total_income
 
 
-def get_cats_info(path: str) -> List[Dict[str, str]]:
-    cats_info = []
-
-    try:
-        with open(path, mode="r") as file:
-            for line in file.readlines():
-                parts = line.strip().split(",")
-                cat_id = str(parts[0])
-                name = str(parts[1])
-                age = int(parts[2])
-
-                entry = {"id": cat_id, "name": name, "age": age}
-                cats_info.append(entry)
-
-        return cats_info
-    except FileNotFoundError:
-        raise FileNotFoundError(f"File not found at path: {file_path_task2}. Please enter a valid path.")
-
-cats_info_result = get_cats_info(file_path_task2)
-for cat in cats_info_result:
-    print(f"ID: {cat['id']}, Name: {cat['name']}, Age: {cat['age']}")
+text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
+total_income = sum_profit(text, generator_numbers)
+print(f"Загальний дохід: {total_income}")

@@ -1,32 +1,30 @@
-from plistlib import InvalidFileException
-from typing import Tuple
+import time
+from typing import Callable, Dict
+
+#Нотатка пану Кирилу: Я розумію, що в умові було зробити дещо легшим способом, але хочу попрактикувати кастомні докоратори
+
+def cached(func: Callable):
+    cache:Dict[int, int] = {}
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        if result not in cache:
+            cache[result] = func(*args, **kwargs)
+        return result
+    return wrapper
+
+@cached
+def fibonacci(x: int) -> int:
+    if x <= 1:
+        return x
+    return fibonacci(x - 1) + fibonacci(x - 2)
 
 
-def parse_salary_info(file_path: str) -> Tuple[int, float]:
-   try:
-       with open(file_path, mode="r") as file:
-           total_salary = 0
-           employees_count = 0
-           while True:
-               line = file.readline()
-               if not line:
-                   break
+before = time.time_ns()
+print(fibonacci(15))
+after = time.time_ns()
+print(after - before)
 
-               try:
-                   parts = line.split(",")
-                   salary = int(parts[1])
-                   total_salary += salary
-                   employees_count += 1
-               except ValueError as e:
-                   raise InvalidFileException(f"Invalid file format at line: {employees_count + 1}. "
-                                              f"Expected name(str),salary(int) ") from e
-
-           average_salary = total_salary / employees_count
-           return total_salary, average_salary
-   except FileNotFoundError:
-       raise FileNotFoundError(f"File not found at path: {file_path}. Please enter a valid path.")
-
-file_path_task1 = "./usefrs.csv"
-total_salary_r, average_salary_r = parse_salary_info(file_path_task1)
-print(f"Total salary: {total_salary_r}")
-print(f"Average salary: {average_salary_r}")
+before2 = time.time_ns()
+print(fibonacci(15))
+after2 = time.time_ns()
+print(after2 - before2)
