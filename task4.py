@@ -4,7 +4,7 @@ from typing import Dict, Callable, Any
 
 from colorama import Fore, init
 
-from exception_utils import InvalidCommandException, CommandExecutionException
+from exception_utils import InvalidCommandException, CommandExecutionException, GenericCommandException
 
 init(autoreset=True)
 GREETING_TEXT = "Hello, how can I help you today?"
@@ -17,16 +17,15 @@ def handle_input_error(rethrow_exception: bool = False):
         def inner(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except (InvalidCommandException, CommandExecutionException) as e:
+            except (GenericCommandException, ValueError) as e:
                 if rethrow_exception:
                     raise
                 print(Fore.RED + str(e))
-                main()
         return inner
     return wrapper
 
 
-@handle_input_error()
+# @handle_input_error()
 def main():
     phone_book: Dict[str, str] = {}
 
@@ -43,21 +42,25 @@ def main():
     while True:
         parts = input("Enter your command: ").split()
         if not parts:
-            raise InvalidCommandException
+            print(Fore.RED + "Invalid command.")
 
         command_name = parts[0].lower()
         arguments = parts[1:]
 
         handler = commands.get(command_name)
         if handler is None:
-            raise InvalidCommandException()
+            print(Fore.RED + "Invalid command.")
+            continue
 
         try:
             handler(*arguments)
         except TypeError:
-            raise InvalidCommandException("Missing arguments for this command.")
+            print(Fore.RED, "Missing arguments for this command.")
+            continue
         except (IndexError, ValueError) as e:
-            raise InvalidCommandException(f"Invalid arguments: {e}")
+            print(Fore.RED, f"Invalid arguments: {e}")
+            continue
+
 
 
 @handle_input_error()

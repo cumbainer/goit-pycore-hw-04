@@ -1,12 +1,18 @@
 from colorama import Fore
 
 
-class InvalidCommandException(Exception):
+class GenericCommandException(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+
+class InvalidCommandException(GenericCommandException):
     def __init__(self, message: str="Invalid Command.") -> None:
         super().__init__(message)
         self.message = message
 
-class CommandExecutionException(Exception):
+class CommandExecutionException(GenericCommandException):
     def __init__(
         self,
         command_name: str="unknown",

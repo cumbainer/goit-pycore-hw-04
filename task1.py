@@ -6,10 +6,13 @@ from typing import Callable, Dict
 def cached(func: Callable):
     cache:Dict[int, int] = {}
     def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if result not in cache:
-            cache[result] = func(*args, **kwargs)
-        return result
+        input_arg = int(*args)
+        if input_arg not in cache:
+            result = func(*args, **kwargs)
+            cache[input_arg] = result
+            return result
+        else:
+            return cache[input_arg]
     return wrapper
 
 @cached
@@ -22,9 +25,9 @@ def fibonacci(x: int) -> int:
 before = time.time_ns()
 print(fibonacci(15))
 after = time.time_ns()
-print(after - before)
+print("TI", (after - before))
 
 before2 = time.time_ns()
 print(fibonacci(15))
 after2 = time.time_ns()
-print(after2 - before2)
+print("TI", (after2 - before2))
