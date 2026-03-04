@@ -1,55 +1,38 @@
 from typing import List, Optional
 
-from model.name_field import NameField
-from model.phone_field import PhoneField
+from model.fields.birthday_field import Birthday
+from model.fields.name_field import Name
+from model.fields.phone_field import Phone
 
 
 class Record:
-    def __init__(self, name: str, phone_numbers_param: Optional[List[int]] = None):
-        self.__name = NameField(name)
-        self.__phone_numbers: List[PhoneField] = [] if phone_numbers_param is None else list(
-            map(PhoneField, phone_numbers_param))
+    def __init__(self, name: str):
+        self.name = Name(name)
+        self.phones: List[Phone] = []
+        self.birthday: Optional[Birthday] = None
 
-    def add_phone(self, phone_number_param: int) -> PhoneField:
-        phone_number = PhoneField(phone_number_param)
-        self.__phone_numbers.append(phone_number)
+    def add_phone(self, phone: str) -> None:
+        self.phones.append(Phone(phone))
 
-        print(f"Added {phone_number_param} to {self.__phone_numbers}")
-        return phone_number
+    def remove_phone(self, phone: str) -> None:
+        self.phones.remove(Phone(phone))
 
-    def remove_phone(self, phone_number_param: int) -> PhoneField:
-        phone_number = PhoneField(phone_number_param)
-        self.__phone_numbers.remove(phone_number)
+    def edit_phone(self, old_phone: str, new_phone: str) -> None:
+        self.remove_phone(old_phone)
+        self.add_phone(new_phone)
 
-        print(f"Removed {phone_number_param}")
-        return phone_number
+    def find_phone(self, phone: str) -> Optional[Phone]:
+        return next((p for p in self.phones if p.number == phone), None)
 
-    def edit_phone(self, old_number_param: int, new_number_param: int) -> PhoneField:
-        old_number_to_remove = next(n for n in self.__phone_numbers if n.number == old_number_param)
-        new_number = PhoneField(new_number_param)
-
-        self.__phone_numbers.remove(old_number_to_remove)
-        self.__phone_numbers.append(new_number)
-
-        print(f"Edited {old_number_param} to {new_number_param}")
-        return new_number
-
-    def find_phone(self, name: str) -> Optional[PhoneField]:
-        name_field = NameField(name)
-
-        return next((number for number in self.__phone_numbers if self.__name == name_field), None)
-
-    @property
-    def name(self) -> str:
-        return self.__name.name
-
-    @property
-    def phone_numbers(self) -> List[PhoneField]:
-        return self.__phone_numbers
+    def add_birthday(self, birthday: str) -> None:
+        self.birthday = Birthday(birthday)
 
     def __str__(self) -> str:
-        return f"Name: {self.name}, Phone Numbers: {self.phone_numbers}"
-
+        phones = "; ".join(str(p) for p in self.phones)
+        result = f"Contact name: {self.name}, phones: {phones}"
+        if self.birthday:
+            result += f", birthday: {self.birthday.value}"
+        return result
 
     def __repr__(self) -> str:
         return str(self)
